@@ -76,3 +76,15 @@ CREATE TABLE t_user_config (
     fix_header VARCHAR(2) DEFAULT '1' COMMENT '固定顶栏(1:固定,0:不固定)',
     color VARCHAR(50) DEFAULT 'rgb(66, 185, 131)' COMMENT '主题颜色(RGB值)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户配置表';
+
+
+CREATE TABLE t_login_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
+    username VARCHAR(50) NOT NULL COMMENT '用户名',
+    login_time DATETIME NOT NULL COMMENT '登录时间',
+    location VARCHAR(100) COMMENT '登录地点',
+    ip VARCHAR(50) COMMENT 'IP地址',
+    INDEX idx_username (username),
+    INDEX idx_login_time (login_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户登录日志表';
+
