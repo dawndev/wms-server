@@ -95,7 +95,7 @@ public class ShiroRealm extends AuthorizingRealm {
         User user = userManager.getUser(username);
 
         if (user == null)
-            throw new AuthenticationException("用户名或密码错误");
+            throw new AuthenticationException("用户名或密码错误~");
         if (!JWTUtil.verify(token, username, user.getPassword()))
             throw new AuthenticationException("token校验不通过");
         return new SimpleAuthenticationInfo(token, token, "febs_shiro_realm");

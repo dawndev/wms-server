@@ -39,8 +39,8 @@ public class CacheInitRunner implements ApplicationRunner {
             cacheService.testConnect();
 
             log.info("缓存初始化 ······");
-            log.info("缓存用户数据 ······");
             List<User> list = this.userService.list();
+            log.info("缓存用户数据 ······{}", list.size());
             for (User user : list) {
                 userManager.loadUserRedisCache(user);
             }
