@@ -1,0 +1,22 @@
+CREATE TABLE `t_user` (
+  `USER_ID` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+  `username` varchar(10) NOT NULL COMMENT '用户名',
+  `password` varchar(255) NOT NULL COMMENT '密码',
+  `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
+  `email` varchar(50) DEFAULT NULL COMMENT '邮箱',
+  `mobile` varchar(20) DEFAULT NULL COMMENT '手机号',
+  `status` char(1) NOT NULL DEFAULT '1' COMMENT '状态（0锁定 1有效）',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `modify_time` datetime DEFAULT NULL COMMENT '修改时间',
+  `last_login_time` datetime DEFAULT NULL COMMENT '最后登录时间',
+  `ssex` char(1) NOT NULL COMMENT '性别（0男 1女 2保密）',
+  `description` varchar(100) DEFAULT NULL COMMENT '个人描述',
+  `avatar` varchar(255) DEFAULT 'default.jpg' COMMENT '头像',
+  `images` varchar(255) DEFAULT NULL COMMENT '人脸图片',
+  PRIMARY KEY (`USER_ID`),
+  UNIQUE KEY `idx_username` (`username`),
+  KEY `idx_dept_id` (`dept_id`),
+  KEY `idx_email` (`email`),
+  KEY `idx_mobile` (`mobile`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
