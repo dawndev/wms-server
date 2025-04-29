@@ -1,9 +1,9 @@
 package com.github.dawndev.wms.system.controller;
 
 import com.github.dawndev.wms.common.controller.BaseController;
-import com.github.dawndev.wms.common.domain.FebsResponse;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
 import com.github.dawndev.wms.common.domain.QueryRequest;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.system.domain.Test;
 import com.github.dawndev.wms.system.service.TestService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -63,14 +63,14 @@ public class TestController extends BaseController {
      * 导入Excel数据，并批量插入 T_TEST表
      */
     @PostMapping("import")
-    public FebsResponse importExcels(@RequestParam("file") MultipartFile file) throws FebsException {
+    public SimpleResponse importExcels(@RequestParam("file") MultipartFile file) throws WmsException {
         try {
             if (file.isEmpty()) {
-                throw new FebsException("导入数据为空");
+                throw new WmsException("导入数据为空");
             }
             String filename = file.getOriginalFilename();
             if (!StringUtils.endsWith(filename, ".xlsx")) {
-                throw new FebsException("只支持.xlsx类型文件导入");
+                throw new WmsException("只支持.xlsx类型文件导入");
             }
             // 开始导入操作
             long beginTimeMillis = System.currentTimeMillis();
@@ -99,11 +99,11 @@ public class TestController extends BaseController {
                     "data", data,
                     "error", error
             );
-            return new FebsResponse().data(result);
+            return new SimpleResponse().data(result);
         } catch (Exception e) {
             message = "导入Excel数据失败," + e.getMessage();
             log.error(message);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
@@ -111,14 +111,14 @@ public class TestController extends BaseController {
      * 导出 Excel
      */
     @PostMapping("export")
-    public void export(HttpServletResponse response) throws FebsException {
+    public void export(HttpServletResponse response) throws WmsException {
         try {
             List<Test> list = this.testService.findTests();
             ExcelKit.$Export(Test.class, response).downXlsx(list, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.system.service.impl;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.domain.Tree;
 import com.github.dawndev.wms.common.utils.TreeUtil;
 import com.github.dawndev.wms.system.dao.MenuMapper;
@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,7 +50,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             buildTrees(trees, menus, ids);
 
             result.put("ids", ids);
-            if (StringUtils.equals(menu.getType(), FebsConstant.TYPE_BUTTON)) {
+            if (StringUtils.equals(menu.getType(), SystemConstant.TYPE_BUTTON)) {
                 result.put("rows", trees);
             } else {
                 Tree<Menu> menuTree = TreeUtil.build(trees);

@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.common.service.impl;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.service.CacheService;
 import com.github.dawndev.wms.common.service.RedisService;
 import com.github.dawndev.wms.system.dao.UserMapper;
@@ -51,7 +51,7 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public User getUser(String username) throws Exception {
-        String userString = this.redisService.get(FebsConstant.USER_CACHE_PREFIX + username);
+        String userString = this.redisService.get(SystemConstant.USER_CACHE_PREFIX + username);
         if (StringUtils.isBlank(userString))
             throw new Exception();
         else
@@ -60,7 +60,7 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public List<Role> getRoles(String username) throws Exception {
-        String roleListString = this.redisService.get(FebsConstant.USER_ROLE_CACHE_PREFIX + username);
+        String roleListString = this.redisService.get(SystemConstant.USER_ROLE_CACHE_PREFIX + username);
         if (StringUtils.isBlank(roleListString)) {
             throw new Exception();
         } else {
@@ -71,7 +71,7 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public List<Menu> getPermissions(String username) throws Exception {
-        String permissionListString = this.redisService.get(FebsConstant.USER_PERMISSION_CACHE_PREFIX + username);
+        String permissionListString = this.redisService.get(SystemConstant.USER_PERMISSION_CACHE_PREFIX + username);
         if (StringUtils.isBlank(permissionListString)) {
             throw new Exception();
         } else {
@@ -82,7 +82,7 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public UserConfig getUserConfig(String userId) throws Exception {
-        String userConfigString = this.redisService.get(FebsConstant.USER_CONFIG_CACHE_PREFIX + userId);
+        String userConfigString = this.redisService.get(SystemConstant.USER_CONFIG_CACHE_PREFIX + userId);
         if (StringUtils.isBlank(userConfigString))
             throw new Exception();
         else
@@ -93,14 +93,14 @@ public class CacheServiceImpl implements CacheService {
     public void saveUser(User user) throws Exception {
         String username = user.getUsername();
         this.deleteUser(username);
-        redisService.set(FebsConstant.USER_CACHE_PREFIX + username, mapper.writeValueAsString(user));
+        redisService.set(SystemConstant.USER_CACHE_PREFIX + username, mapper.writeValueAsString(user));
     }
 
     @Override
     public void saveUser(String username) throws Exception {
         User user = userMapper.findDetail(username);
         this.deleteUser(username);
-        redisService.set(FebsConstant.USER_CACHE_PREFIX + username, mapper.writeValueAsString(user));
+        redisService.set(SystemConstant.USER_CACHE_PREFIX + username, mapper.writeValueAsString(user));
     }
 
     @Override
@@ -108,7 +108,7 @@ public class CacheServiceImpl implements CacheService {
         List<Role> roleList = this.roleService.findUserRole(username);
         if (!roleList.isEmpty()) {
             this.deleteRoles(username);
-            redisService.set(FebsConstant.USER_ROLE_CACHE_PREFIX + username, mapper.writeValueAsString(roleList));
+            redisService.set(SystemConstant.USER_ROLE_CACHE_PREFIX + username, mapper.writeValueAsString(roleList));
         }
 
     }
@@ -118,7 +118,7 @@ public class CacheServiceImpl implements CacheService {
         List<Menu> permissionList = this.menuService.findUserPermissions(username);
         if (!permissionList.isEmpty()) {
             this.deletePermissions(username);
-            redisService.set(FebsConstant.USER_PERMISSION_CACHE_PREFIX + username, mapper.writeValueAsString(permissionList));
+            redisService.set(SystemConstant.USER_PERMISSION_CACHE_PREFIX + username, mapper.writeValueAsString(permissionList));
         }
     }
 
@@ -127,30 +127,30 @@ public class CacheServiceImpl implements CacheService {
         UserConfig userConfig = this.userConfigService.findByUserId(userId);
         if (userConfig != null) {
             this.deleteUserConfigs(userId);
-            redisService.set(FebsConstant.USER_CONFIG_CACHE_PREFIX + userId, mapper.writeValueAsString(userConfig));
+            redisService.set(SystemConstant.USER_CONFIG_CACHE_PREFIX + userId, mapper.writeValueAsString(userConfig));
         }
     }
 
     @Override
     public void deleteUser(String username) throws Exception {
         username = username.toLowerCase();
-        redisService.del(FebsConstant.USER_CACHE_PREFIX + username);
+        redisService.del(SystemConstant.USER_CACHE_PREFIX + username);
     }
 
     @Override
     public void deleteRoles(String username) throws Exception {
         username = username.toLowerCase();
-        redisService.del(FebsConstant.USER_ROLE_CACHE_PREFIX + username);
+        redisService.del(SystemConstant.USER_ROLE_CACHE_PREFIX + username);
     }
 
     @Override
     public void deletePermissions(String username) throws Exception {
         username = username.toLowerCase();
-        redisService.del(FebsConstant.USER_PERMISSION_CACHE_PREFIX + username);
+        redisService.del(SystemConstant.USER_PERMISSION_CACHE_PREFIX + username);
     }
 
     @Override
     public void deleteUserConfigs(String userId) throws Exception {
-        redisService.del(FebsConstant.USER_CONFIG_CACHE_PREFIX + userId);
+        redisService.del(SystemConstant.USER_CONFIG_CACHE_PREFIX + userId);
     }
 }

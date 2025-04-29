@@ -1,7 +1,7 @@
 package com.github.dawndev.wms.common.authentication;
 
-import com.github.dawndev.wms.common.properties.FebsProperties;
-import com.github.dawndev.wms.common.utils.FebsUtil;
+import com.github.dawndev.wms.common.properties.WmsProperties;
+import com.github.dawndev.wms.common.utils.WarehouseUtil;
 import com.github.dawndev.wms.common.utils.SpringContextUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +30,8 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws UnauthorizedException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        FebsProperties febsProperties = SpringContextUtil.getBean(FebsProperties.class);
-        String[] anonUrl = StringUtils.splitByWholeSeparatorPreserveAllTokens(febsProperties.getShiro().getAnonUrl(), StringPool.COMMA);
+        WmsProperties properties = SpringContextUtil.getBean(WmsProperties.class);
+        String[] anonUrl = StringUtils.splitByWholeSeparatorPreserveAllTokens(properties.getShiro().getAnonUrl(), StringPool.COMMA);
 
         boolean match = false;
         for (String u : anonUrl) {
@@ -56,7 +56,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     protected boolean executeLogin(ServletRequest request, ServletResponse response) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String token = httpServletRequest.getHeader(TOKEN);
-        JWTToken jwtToken = new JWTToken(FebsUtil.decryptToken(token));
+        JWTToken jwtToken = new JWTToken(WarehouseUtil.decryptToken(token));
         try {
             getSubject(request, response).login(jwtToken);
             return true;

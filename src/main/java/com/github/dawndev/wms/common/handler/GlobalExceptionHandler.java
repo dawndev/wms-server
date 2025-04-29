@@ -1,7 +1,7 @@
 package com.github.dawndev.wms.common.handler;
 
-import com.github.dawndev.wms.common.domain.FebsResponse;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.common.exception.LimitAccessException;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -29,34 +29,33 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public FebsResponse handleException(Exception e) {
+    public SimpleResponse handleException(Exception e) {
         log.error("系统内部异常，异常信息：", e);
-        return new FebsResponse().message("系统内部异常");
+        return new SimpleResponse().message("系统内部异常");
     }
 
-    @ExceptionHandler(value = FebsException.class)
+    @ExceptionHandler(value = WmsException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public FebsResponse handleParamsInvalidException(FebsException e) {
+    public SimpleResponse handleParamsInvalidException(WmsException e) {
         log.error("系统错误：{}", e.getMessage());
-        return new FebsResponse().message(e.getMessage());
+        return new SimpleResponse().message(e.getMessage());
     }
 
     /**
      * 统一处理请求参数校验(实体对象传参)
      *
      * @param e BindException
-     * @return FebsResponse
      */
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public FebsResponse validExceptionHandler(BindException e) {
+    public SimpleResponse validExceptionHandler(BindException e) {
         StringBuilder message = new StringBuilder();
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
         for (FieldError error : fieldErrors) {
             message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return new FebsResponse().message(message.toString());
+        return new SimpleResponse().message(message.toString());
 
     }
 
@@ -64,11 +63,10 @@ public class GlobalExceptionHandler {
      * 统一处理请求参数校验(普通传参)
      *
      * @param e ConstraintViolationException
-     * @return FebsResponse
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public FebsResponse handleConstraintViolationException(ConstraintViolationException e) {
+    public SimpleResponse handleConstraintViolationException(ConstraintViolationException e) {
         StringBuilder message = new StringBuilder();
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         for (ConstraintViolation<?> violation : violations) {
@@ -77,14 +75,14 @@ public class GlobalExceptionHandler {
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return new FebsResponse().message(message.toString());
+        return new SimpleResponse().message(message.toString());
     }
 
     @ExceptionHandler(value = LimitAccessException.class)
     @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-    public FebsResponse handleLimitAccessException(LimitAccessException e) {
+    public SimpleResponse handleLimitAccessException(LimitAccessException e) {
         log.warn(e.getMessage());
-        return new FebsResponse().message(e.getMessage());
+        return new SimpleResponse().message(e.getMessage());
     }
 
     @ExceptionHandler(value = UnauthorizedException.class)

@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.cos.controller;
 
-import com.github.dawndev.wms.common.domain.FebsResponse;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
 import com.github.dawndev.wms.common.utils.FileUtil;
 import com.github.dawndev.wms.common.utils.R;
 import com.github.dawndev.wms.cos.entity.StudentInfo;
@@ -71,24 +71,24 @@ public class FaceRecognitionController {
      * @return
      */
     @PostMapping("/verification")
-    public FebsResponse verification(@RequestParam("file") String file, HttpServletRequest request) throws Exception {
+    public SimpleResponse verification(@RequestParam("file") String file, HttpServletRequest request) throws Exception {
 //        BASE64Encoder base64Encoder =new BASE64Encoder();
 //        String base64EncoderImg = base64Encoder.encode(file.getBytes());
 
         String result = faceRecognition.verification(file);
         System.out.println(result);
         if ("error".equals(result)) {
-            return new FebsResponse().message("人脸识别未通过");
+            return new SimpleResponse().message("人脸识别未通过");
         } else {
             // 获取用户
             StudentInfo studentInfo = studentInfoService.getOne(Wrappers.<StudentInfo>lambdaQuery().eq(StudentInfo::getName, result));
             if (studentInfo == null) {
-                return new FebsResponse().message("人脸不匹配");
+                return new SimpleResponse().message("人脸不匹配");
             }
 
             User user = userService.getOne(Wrappers.<User>lambdaQuery().eq(User::getUserId, studentInfo.getUserId()));
             if (user == null) {
-                return new FebsResponse().message("人脸不匹配");
+                return new SimpleResponse().message("人脸不匹配");
             }
             return loginLogService.faceLogin(user, request);
         }

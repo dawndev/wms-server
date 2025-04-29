@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.common.task;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.service.RedisService;
 import com.github.dawndev.wms.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 /**
- * 主要用于定时删除 Redis中 key为 febs.user.active 中
+ * 主要用于定时删除 Redis中 key为 wms.user.active 中
  * 已经过期的 score
  */
 @Slf4j
@@ -25,7 +25,7 @@ public class CacheTask {
     public void run() {
         try {
             String now = DateUtil.formatFullTime(LocalDateTime.now());
-            redisService.zremrangeByScore(FebsConstant.ACTIVE_USERS_ZSET_PREFIX, "-inf", now);
+            redisService.zremrangeByScore(SystemConstant.ACTIVE_USERS_ZSET_PREFIX, "-inf", now);
             log.info("delete expired user");
         } catch (Exception ignore) {
         }

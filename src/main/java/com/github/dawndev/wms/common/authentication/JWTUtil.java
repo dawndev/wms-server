@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.common.authentication;
 
-import com.github.dawndev.wms.common.properties.FebsProperties;
+import com.github.dawndev.wms.common.properties.WmsProperties;
 import com.github.dawndev.wms.common.utils.SpringContextUtil;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -15,7 +15,7 @@ import java.util.Date;
 @Slf4j
 public class JWTUtil {
 
-    private static final long EXPIRE_TIME = SpringContextUtil.getBean(FebsProperties.class).getShiro().getJwtTimeOut() * 1000;
+    private static final long EXPIRE_TIME = SpringContextUtil.getBean(WmsProperties.class).getShiro().getJwtTimeOut() * 1000;
 
     /**
      * 校验 token是否正确

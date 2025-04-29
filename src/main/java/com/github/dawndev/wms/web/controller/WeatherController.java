@@ -1,8 +1,8 @@
 package com.github.dawndev.wms.web.controller;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
-import com.github.dawndev.wms.common.domain.FebsResponse;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.domain.SystemConstant;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.common.utils.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -21,14 +21,14 @@ public class WeatherController {
 
     @GetMapping
     @RequiresPermissions("weather:view")
-    public FebsResponse queryWeather(@NotBlank(message = "{required}") String areaId) throws FebsException {
+    public SimpleResponse queryWeather(@NotBlank(message = "{required}") String areaId) throws WmsException {
         try {
-            String data = HttpUtil.sendPost(FebsConstant.MEIZU_WEATHER_URL, "cityIds=" + areaId);
-            return new FebsResponse().data(data);
+            String data = HttpUtil.sendPost(SystemConstant.MEIZU_WEATHER_URL, "cityIds=" + areaId);
+            return new SimpleResponse().data(data);
         } catch (Exception e) {
             String message = "天气查询失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 }

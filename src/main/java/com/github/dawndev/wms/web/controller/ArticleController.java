@@ -1,8 +1,8 @@
 package com.github.dawndev.wms.web.controller;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
-import com.github.dawndev.wms.common.domain.FebsResponse;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.domain.SystemConstant;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.common.utils.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,22 +18,22 @@ public class ArticleController {
 
     @GetMapping
     @RequiresPermissions("article:view")
-    public FebsResponse queryArticle(String date) throws FebsException {
+    public SimpleResponse queryArticle(String date) throws WmsException {
         String param;
         String data;
         try {
             if (StringUtils.isNotBlank(date)) {
                 param = "dev=1&date=" + date;
-                data = HttpUtil.sendSSLPost(FebsConstant.MRYW_DAY_URL, param);
+                data = HttpUtil.sendSSLPost(SystemConstant.MRYW_DAY_URL, param);
             } else {
                 param = "dev=1";
-                data = HttpUtil.sendSSLPost(FebsConstant.MRYW_TODAY_URL, param);
+                data = HttpUtil.sendSSLPost(SystemConstant.MRYW_TODAY_URL, param);
             }
-            return new FebsResponse().data(data);
+            return new SimpleResponse().data(data);
         } catch (Exception e) {
             String message = "获取文章失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 }

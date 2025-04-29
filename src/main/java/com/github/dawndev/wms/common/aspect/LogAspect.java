@@ -1,7 +1,7 @@
 package com.github.dawndev.wms.common.aspect;
 
 import com.github.dawndev.wms.common.authentication.JWTUtil;
-import com.github.dawndev.wms.common.properties.FebsProperties;
+import com.github.dawndev.wms.common.properties.WmsProperties;
 import com.github.dawndev.wms.common.utils.HttpContextUtil;
 import com.github.dawndev.wms.common.utils.IPUtil;
 import com.github.dawndev.wms.system.domain.SysLog;
@@ -20,9 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * AOP 记录用户操作日志
- *
- * @author MrBird
- * @link https://mrbird.cc/Spring-Boot-AOP%20log.html
  */
 @Slf4j
 @Aspect
@@ -30,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 public class LogAspect {
 
     @Autowired
-    private FebsProperties febsProperties;
+    private WmsProperties wmsProperties;
 
     @Autowired
     private LogService logService;
@@ -52,7 +49,7 @@ public class LogAspect {
         String ip = IPUtil.getIpAddr(request);
         // 执行时长(毫秒)
         long time = System.currentTimeMillis() - beginTime;
-        if (febsProperties.isOpenAopLog()) {
+        if (wmsProperties.isOpenAopLog()) {
             // 保存日志
             String token = (String) SecurityUtils.getSubject().getPrincipal();
             String username = "";

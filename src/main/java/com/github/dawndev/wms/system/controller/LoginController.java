@@ -4,10 +4,10 @@ import com.github.dawndev.wms.common.annotation.Limit;
 import com.github.dawndev.wms.common.authentication.JWTToken;
 import com.github.dawndev.wms.common.authentication.JWTUtil;
 import com.github.dawndev.wms.common.domain.ActiveUser;
-import com.github.dawndev.wms.common.domain.FebsConstant;
-import com.github.dawndev.wms.common.domain.FebsResponse;
-import com.github.dawndev.wms.common.exception.FebsException;
-import com.github.dawndev.wms.common.properties.FebsProperties;
+import com.github.dawndev.wms.common.domain.SystemConstant;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
+import com.github.dawndev.wms.common.exception.WmsException;
+import com.github.dawndev.wms.common.properties.WmsProperties;
 import com.github.dawndev.wms.common.service.RedisService;
 import com.github.dawndev.wms.common.utils.*;
 import com.github.dawndev.wms.system.dao.LoginLogMapper;
@@ -45,13 +45,13 @@ public class LoginController {
     @Autowired
     private LoginLogMapper loginLogMapper;
     @Autowired
-    private FebsProperties properties;
+    private WmsProperties properties;
     @Autowired
     private ObjectMapper mapper;
 
     @PostMapping("/login")
     @Limit(key = "login", period = 60, count = 20, name = "登录接口", prefix = "limit")
-    public FebsResponse login(
+    public SimpleResponse login(
             @NotBlank(message = "{required}") String username,
             @NotBlank(message = "{required}") String password, HttpServletRequest request) throws Exception {
         username = StringUtils.lowerCase(username);
@@ -61,11 +61,11 @@ public class LoginController {
         User user = this.userManager.getUser(username);
 
         if (user == null)
-            throw new FebsException(errorMessage);
+            throw new WmsException("用户名不可以为空~");
         if (!StringUtils.equals(user.getPassword(), password))
-            throw new FebsException(errorMessage);
+            throw new WmsException(errorMessage + password + " | " + (user.getPassword()));
         if (User.STATUS_LOCK.equals(user.getStatus()))
-            throw new FebsException("账号已被锁定,请联系管理员！");
+            throw new WmsException("账号已被锁定,请联系管理员！");
 
         // 更新用户登录时间
         this.userService.updateLoginTime(username);
@@ -74,7 +74,7 @@ public class LoginController {
         loginLog.setUsername(username);
         this.loginLogService.saveLoginLog(loginLog);
 
-        String token = FebsUtil.encryptToken(JWTUtil.sign(username, password));
+        String token = WarehouseUtil.encryptToken(JWTUtil.sign(username, password));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getShiro().getJwtTimeOut());
         String expireTimeStr = DateUtil.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
@@ -83,11 +83,11 @@ public class LoginController {
         user.setId(userId);
 
         Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
-        return new FebsResponse().message("认证成功").data(userInfo);
+        return new SimpleResponse().message("认证成功").data(userInfo);
     }
 
     @GetMapping("index/{username}")
-    public FebsResponse index(@NotBlank(message = "{required}") @PathVariable String username) {
+    public SimpleResponse index(@NotBlank(message = "{required}") @PathVariable String username) {
         Map<String, Object> data = new HashMap<>();
         // 获取系统访问记录
         Long totalVisitCount = loginLogMapper.findTotalVisitCount();
@@ -103,14 +103,14 @@ public class LoginController {
         param.setUsername(username);
         List<Map<String, Object>> lastSevenUserVisitCount = loginLogMapper.findLastSevenDaysVisitCount(param);
         data.put("lastSevenUserVisitCount", lastSevenUserVisitCount);
-        return new FebsResponse().data(data);
+        return new SimpleResponse().data(data);
     }
 
     @RequiresPermissions("user:online")
     @GetMapping("online")
-    public FebsResponse userOnline(String username) throws Exception {
+    public SimpleResponse userOnline(String username) throws Exception {
         String now = DateUtil.formatFullTime(LocalDateTime.now());
-        Set<String> userOnlineStringSet = redisService.zrangeByScore(FebsConstant.ACTIVE_USERS_ZSET_PREFIX, now, "+inf");
+        Set<String> userOnlineStringSet = redisService.zrangeByScore(SystemConstant.ACTIVE_USERS_ZSET_PREFIX, now, "+inf");
         List<ActiveUser> activeUsers = new ArrayList<>();
         for (String userOnlineString : userOnlineStringSet) {
             ActiveUser activeUser = mapper.readValue(userOnlineString, ActiveUser.class);
@@ -122,14 +122,14 @@ public class LoginController {
                 activeUsers.add(activeUser);
             }
         }
-        return new FebsResponse().data(activeUsers);
+        return new SimpleResponse().data(activeUsers);
     }
 
     @DeleteMapping("kickout/{id}")
     @RequiresPermissions("user:kickout")
     public void kickout(@NotBlank(message = "{required}") @PathVariable String id) throws Exception {
         String now = DateUtil.formatFullTime(LocalDateTime.now());
-        Set<String> userOnlineStringSet = redisService.zrangeByScore(FebsConstant.ACTIVE_USERS_ZSET_PREFIX, now, "+inf");
+        Set<String> userOnlineStringSet = redisService.zrangeByScore(SystemConstant.ACTIVE_USERS_ZSET_PREFIX, now, "+inf");
         ActiveUser kickoutUser = null;
         String kickoutUserString = "";
         for (String userOnlineString : userOnlineStringSet) {
@@ -141,9 +141,9 @@ public class LoginController {
         }
         if (kickoutUser != null && StringUtils.isNotBlank(kickoutUserString)) {
             // 删除 zset中的记录
-            redisService.zrem(FebsConstant.ACTIVE_USERS_ZSET_PREFIX, kickoutUserString);
+            redisService.zrem(SystemConstant.ACTIVE_USERS_ZSET_PREFIX, kickoutUserString);
             // 删除对应的 token缓存
-            redisService.del(FebsConstant.TOKEN_CACHE_PREFIX + kickoutUser.getToken() + "." + kickoutUser.getIp());
+            redisService.del(SystemConstant.TOKEN_CACHE_PREFIX + kickoutUser.getToken() + "." + kickoutUser.getIp());
         }
     }
 
@@ -170,9 +170,9 @@ public class LoginController {
         activeUser.setLoginAddress(AddressUtil.getCityInfo(ip));
 
         // zset 存储登录用户，score 为过期时间戳
-        this.redisService.zadd(FebsConstant.ACTIVE_USERS_ZSET_PREFIX, Double.valueOf(token.getExipreAt()), mapper.writeValueAsString(activeUser));
+        this.redisService.zadd(SystemConstant.ACTIVE_USERS_ZSET_PREFIX, Double.valueOf(token.getExipreAt()), mapper.writeValueAsString(activeUser));
         // redis 中存储这个加密 token，key = 前缀 + 加密 token + .ip
-        this.redisService.set(FebsConstant.TOKEN_CACHE_PREFIX + token.getToken() + StringPool.DOT + ip, token.getToken(), properties.getShiro().getJwtTimeOut() * 1000);
+        this.redisService.set(SystemConstant.TOKEN_CACHE_PREFIX + token.getToken() + StringPool.DOT + ip, token.getToken(), properties.getShiro().getJwtTimeOut() * 1000);
 
         return activeUser.getId();
     }

@@ -3,7 +3,7 @@ package com.github.dawndev.wms.system.controller;
 import com.github.dawndev.wms.common.annotation.Log;
 import com.github.dawndev.wms.common.controller.BaseController;
 import com.github.dawndev.wms.common.domain.QueryRequest;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.system.domain.Dept;
 import com.github.dawndev.wms.system.service.DeptService;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -39,53 +39,53 @@ public class DeptController extends BaseController {
     @Log("新增部门")
     @PostMapping
     @RequiresPermissions("dept:add")
-    public void addDept(@Valid Dept dept) throws FebsException {
+    public void addDept(@Valid Dept dept) throws WmsException {
         try {
             this.deptService.createDept(dept);
         } catch (Exception e) {
             message = "新增部门失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @Log("删除部门")
     @DeleteMapping("/{deptIds}")
     @RequiresPermissions("dept:delete")
-    public void deleteDepts(@NotBlank(message = "{required}") @PathVariable String deptIds) throws FebsException {
+    public void deleteDepts(@NotBlank(message = "{required}") @PathVariable String deptIds) throws WmsException {
         try {
             String[] ids = deptIds.split(StringPool.COMMA);
             this.deptService.deleteDepts(ids);
         } catch (Exception e) {
             message = "删除部门失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @Log("修改部门")
     @PutMapping
     @RequiresPermissions("dept:update")
-    public void updateDept(@Valid Dept dept) throws FebsException {
+    public void updateDept(@Valid Dept dept) throws WmsException {
         try {
             this.deptService.updateDept(dept);
         } catch (Exception e) {
             message = "修改部门失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @PostMapping("excel")
     @RequiresPermissions("dept:export")
-    public void export(Dept dept, QueryRequest request, HttpServletResponse response) throws FebsException {
+    public void export(Dept dept, QueryRequest request, HttpServletResponse response) throws WmsException {
         try {
             List<Dept> depts = this.deptService.findDepts(dept, request);
             ExcelKit.$Export(Dept.class, response).downXlsx(depts, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 }

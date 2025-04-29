@@ -1,8 +1,8 @@
 package com.github.dawndev.wms.common.authentication;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.service.RedisService;
-import com.github.dawndev.wms.common.utils.FebsUtil;
+import com.github.dawndev.wms.common.utils.WarehouseUtil;
 import com.github.dawndev.wms.common.utils.HttpContextUtil;
 import com.github.dawndev.wms.common.utils.IPUtil;
 import com.github.dawndev.wms.system.domain.User;
@@ -76,10 +76,10 @@ public class ShiroRealm extends AuthorizingRealm {
         HttpServletRequest request = HttpContextUtil.getHttpServletRequest();
         String ip = IPUtil.getIpAddr(request);
 
-        String encryptToken = FebsUtil.encryptToken(token);
+        String encryptToken = WarehouseUtil.encryptToken(token);
         String encryptTokenInRedis = null;
         try {
-            encryptTokenInRedis = redisService.get(FebsConstant.TOKEN_CACHE_PREFIX + encryptToken + "." + ip);
+            encryptTokenInRedis = redisService.get(SystemConstant.TOKEN_CACHE_PREFIX + encryptToken + "." + ip);
         } catch (Exception ignore) {
         }
         // 如果找不到，说明已经失效
@@ -98,6 +98,6 @@ public class ShiroRealm extends AuthorizingRealm {
             throw new AuthenticationException("用户名或密码错误~");
         if (!JWTUtil.verify(token, username, user.getPassword()))
             throw new AuthenticationException("token校验不通过");
-        return new SimpleAuthenticationInfo(token, token, "febs_shiro_realm");
+        return new SimpleAuthenticationInfo(token, token, "wms_shiro_realm");
     }
 }

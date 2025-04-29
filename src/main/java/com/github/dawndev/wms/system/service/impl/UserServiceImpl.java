@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.system.service.impl;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.domain.QueryRequest;
 import com.github.dawndev.wms.common.service.CacheService;
 import com.github.dawndev.wms.common.utils.SortUtil;
@@ -60,7 +60,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public IPage<User> findUserDetail(User user, QueryRequest request) {
         try {
             Page<User> page = new Page<>();
-            SortUtil.handlePageSort(request, page, "userId", FebsConstant.ORDER_ASC, false);
+            SortUtil.handlePageSort(request, page, "userId", SystemConstant.ORDER_ASC, false);
             return this.baseMapper.findUserDetail(page, user);
         } catch (Exception e) {
             log.error("查询用户异常", e);

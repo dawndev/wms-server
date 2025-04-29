@@ -1,26 +1,22 @@
 package com.github.dawndev.wms.cos.service.impl;
 
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.cos.dao.StorehouseInfoMapper;
 import com.github.dawndev.wms.cos.entity.ReplenishmentInfo;
 import com.github.dawndev.wms.cos.dao.ReplenishmentInfoMapper;
 import com.github.dawndev.wms.cos.entity.StorehouseInfo;
 import com.github.dawndev.wms.cos.service.IReplenishmentInfoService;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author FanK
@@ -67,7 +63,7 @@ public class ReplenishmentInfoServiceImpl extends ServiceImpl<ReplenishmentInfoM
         // 获取补货信息
         ReplenishmentInfo replenishmentInfo = this.getById(id);
         if (StrUtil.isEmpty(replenishmentInfo.getReplenishment())) {
-            throw new FebsException("无需要补货信息！");
+            throw new WmsException("无需要补货信息！");
         }
         List<StorehouseInfo> storehouseList = Convert.toList(StorehouseInfo.class, replenishmentInfo.getReplenishment());
 //        List<String> materialNameList = storehouseList.stream().map(StorehouseInfo::getMaterialName).distinct().collect(Collectors.toList());

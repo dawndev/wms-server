@@ -3,7 +3,7 @@ package com.github.dawndev.wms.system.controller;
 import com.github.dawndev.wms.common.annotation.Log;
 import com.github.dawndev.wms.common.controller.BaseController;
 import com.github.dawndev.wms.common.domain.QueryRequest;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.system.domain.Dict;
 import com.github.dawndev.wms.system.service.DictService;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -40,53 +40,53 @@ public class DictController extends BaseController {
     @Log("新增字典")
     @PostMapping
     @RequiresPermissions("dict:add")
-    public void addDict(@Valid Dict dict) throws FebsException {
+    public void addDict(@Valid Dict dict) throws WmsException {
         try {
             this.dictService.createDict(dict);
         } catch (Exception e) {
             message = "新增字典成功";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @Log("删除字典")
     @DeleteMapping("/{dictIds}")
     @RequiresPermissions("dict:delete")
-    public void deleteDicts(@NotBlank(message = "{required}") @PathVariable String dictIds) throws FebsException {
+    public void deleteDicts(@NotBlank(message = "{required}") @PathVariable String dictIds) throws WmsException {
         try {
             String[] ids = dictIds.split(StringPool.COMMA);
             this.dictService.deleteDicts(ids);
         } catch (Exception e) {
             message = "删除字典成功";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @Log("修改字典")
     @PutMapping
     @RequiresPermissions("dict:update")
-    public void updateDict(@Valid Dict dict) throws FebsException {
+    public void updateDict(@Valid Dict dict) throws WmsException {
         try {
             this.dictService.updateDict(dict);
         } catch (Exception e) {
             message = "修改字典成功";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @PostMapping("excel")
     @RequiresPermissions("dict:export")
-    public void export(QueryRequest request, Dict dict, HttpServletResponse response) throws FebsException {
+    public void export(QueryRequest request, Dict dict, HttpServletResponse response) throws WmsException {
         try {
             List<Dict> dicts = this.dictService.findDicts(request, dict).getRecords();
             ExcelKit.$Export(Dict.class, response).downXlsx(dicts, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 }

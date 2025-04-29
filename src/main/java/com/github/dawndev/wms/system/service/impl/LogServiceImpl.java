@@ -1,7 +1,7 @@
 package com.github.dawndev.wms.system.service.impl;
 
 import com.github.dawndev.wms.common.annotation.Log;
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.domain.QueryRequest;
 import com.github.dawndev.wms.common.utils.AddressUtil;
 import com.github.dawndev.wms.common.utils.SortUtil;
@@ -58,7 +58,7 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, SysLog> implements Lo
             }
 
             Page<SysLog> page = new Page<>(request.getPageNum(), request.getPageSize());
-            SortUtil.handlePageSort(request, page, "createTime", FebsConstant.ORDER_DESC, true);
+            SortUtil.handlePageSort(request, page, "createTime", SystemConstant.ORDER_DESC, true);
 
             return this.page(page, queryWrapper);
         } catch (Exception e) {

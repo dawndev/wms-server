@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.system.controller;
 
-import com.github.dawndev.wms.common.domain.FebsResponse;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
 import com.github.dawndev.wms.common.domain.RedisInfo;
 import com.github.dawndev.wms.common.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,9 @@ public class RedisController {
     private RedisService redisService;
 
     @GetMapping("info")
-    public FebsResponse getRedisInfo() throws Exception {
+    public SimpleResponse getRedisInfo() throws Exception {
         List<RedisInfo> infoList = this.redisService.getRedisInfo();
-        return new FebsResponse().data(infoList);
+        return new SimpleResponse().data(infoList);
     }
 
     @GetMapping("keysSize")

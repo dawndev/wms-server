@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.common.utils;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.domain.QueryRequest;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -25,20 +25,20 @@ public class SortUtil {
         page.setSize(request.getPageSize());
         String sortField = request.getSortField();
         if (camelToUnderscore) {
-            sortField = FebsUtil.camelToUnderscore(sortField);
-            defaultSort = FebsUtil.camelToUnderscore(defaultSort);
+            sortField = WarehouseUtil.camelToUnderscore(sortField);
+            defaultSort = WarehouseUtil.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
                 && StringUtils.isNotBlank(request.getSortOrder())
                 && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
                 && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
-            if (StringUtils.equals(request.getSortOrder(), FebsConstant.ORDER_DESC))
+            if (StringUtils.equals(request.getSortOrder(), SystemConstant.ORDER_DESC))
                 page.setDesc(sortField);
             else
                 page.setAsc(sortField);
         } else {
             if (StringUtils.isNotBlank(defaultSort)) {
-                if (StringUtils.equals(defaultOrder, FebsConstant.ORDER_DESC))
+                if (StringUtils.equals(defaultOrder, SystemConstant.ORDER_DESC))
                     page.setDesc(defaultSort);
                 else
                     page.setAsc(defaultSort);
@@ -79,20 +79,20 @@ public class SortUtil {
     public static void handleWrapperSort(QueryRequest request, QueryWrapper wrapper, String defaultSort, String defaultOrder, boolean camelToUnderscore) {
         String sortField = request.getSortField();
         if (camelToUnderscore) {
-            sortField = FebsUtil.camelToUnderscore(sortField);
-            defaultSort = FebsUtil.camelToUnderscore(defaultSort);
+            sortField = WarehouseUtil.camelToUnderscore(sortField);
+            defaultSort = WarehouseUtil.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
                 && StringUtils.isNotBlank(request.getSortOrder())
                 && !StringUtils.equalsIgnoreCase(request.getSortField(), "undefined")
                 && !StringUtils.equalsIgnoreCase(request.getSortOrder(), "undefined")) {
-            if (StringUtils.equals(request.getSortOrder(), FebsConstant.ORDER_DESC))
+            if (StringUtils.equals(request.getSortOrder(), SystemConstant.ORDER_DESC))
                 wrapper.orderByDesc(sortField);
             else
                 wrapper.orderByAsc(sortField);
         } else {
             if (StringUtils.isNotBlank(defaultSort)) {
-                if (StringUtils.equals(defaultOrder, FebsConstant.ORDER_DESC))
+                if (StringUtils.equals(defaultOrder, SystemConstant.ORDER_DESC))
                     wrapper.orderByDesc(defaultSort);
                 else
                     wrapper.orderByAsc(defaultSort);

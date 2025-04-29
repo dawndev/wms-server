@@ -1,15 +1,14 @@
 package com.github.dawndev.wms.web.controller;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
-import com.github.dawndev.wms.common.domain.FebsResponse;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.domain.SystemConstant;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.common.utils.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import jakarta.validation.constraints.NotBlank;
 
 @Slf4j
@@ -21,50 +20,50 @@ public class MovieController {
     private String message;
 
     @GetMapping("hot")
-    public FebsResponse getMoiveHot() throws FebsException {
+    public SimpleResponse getMoiveHot() throws WmsException {
         try {
-            String data = HttpUtil.sendSSLPost(FebsConstant.TIME_MOVIE_HOT_URL, "locationId=328");
-            return new FebsResponse().data(data);
+            String data = HttpUtil.sendSSLPost(SystemConstant.TIME_MOVIE_HOT_URL, "locationId=328");
+            return new SimpleResponse().data(data);
         } catch (Exception e) {
             message = "获取热映影片信息失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @GetMapping("coming")
-    public FebsResponse getMovieComing() throws FebsException {
+    public SimpleResponse getMovieComing() throws WmsException {
         try {
-            String data = HttpUtil.sendSSLPost(FebsConstant.TIME_MOVIE_COMING_URL, "locationId=328");
-            return new FebsResponse().data(data);
+            String data = HttpUtil.sendSSLPost(SystemConstant.TIME_MOVIE_COMING_URL, "locationId=328");
+            return new SimpleResponse().data(data);
         } catch (Exception e) {
             message = "获取即将上映影片信息失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @GetMapping("detail")
-    public FebsResponse getDetail(@NotBlank(message = "{required}") String id) throws FebsException {
+    public SimpleResponse getDetail(@NotBlank(message = "{required}") String id) throws WmsException {
         try {
-            String data = HttpUtil.sendSSLPost(FebsConstant.TIME_MOVIE_DETAIL_URL, "locationId=328&movieId=" + id);
-            return new FebsResponse().data(data);
+            String data = HttpUtil.sendSSLPost(SystemConstant.TIME_MOVIE_DETAIL_URL, "locationId=328&movieId=" + id);
+            return new SimpleResponse().data(data);
         } catch (Exception e) {
             message = "获取影片详情失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @GetMapping("comments")
-    public FebsResponse getComments(@NotBlank(message = "{required}") String id) throws FebsException {
+    public SimpleResponse getComments(@NotBlank(message = "{required}") String id) throws WmsException {
         try {
-            String data = HttpUtil.sendSSLPost(FebsConstant.TIME_MOVIE_COMMENTS_URL, "movieId=" + id);
-            return new FebsResponse().data(data);
+            String data = HttpUtil.sendSSLPost(SystemConstant.TIME_MOVIE_COMMENTS_URL, "movieId=" + id);
+            return new SimpleResponse().data(data);
         } catch (Exception e) {
             message = "获取影片评论失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 }

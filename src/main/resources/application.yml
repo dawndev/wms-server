@@ -27,7 +27,7 @@ spring:
         max-pool-size: 15
         min-idle: 5
         connection-test-query: select 1
-        pool-name: FebsHikariCP
+        pool-name: WMS-HikariCP
       # 配置默认数据源
       primary: primary
       datasource:
@@ -79,7 +79,7 @@ management:
         include: ['httptrace', 'metrics']
 
 
-febs:
+wms:
   # 是否异步记录用户操作日志
   openAopLog: true
   # 单次最大批量入库数量

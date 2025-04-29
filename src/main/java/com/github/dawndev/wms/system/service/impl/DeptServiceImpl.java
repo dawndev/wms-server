@@ -1,6 +1,6 @@
 package com.github.dawndev.wms.system.service.impl;
 
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.domain.QueryRequest;
 import com.github.dawndev.wms.common.domain.Tree;
 import com.github.dawndev.wms.common.utils.SortUtil;
@@ -55,7 +55,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
             queryWrapper.lambda()
                     .ge(Dept::getCreateTime, dept.getCreateTimeFrom())
                     .le(Dept::getCreateTime, dept.getCreateTimeTo());
-        SortUtil.handleWrapperSort(request, queryWrapper, "orderNum", FebsConstant.ORDER_ASC, true);
+        SortUtil.handleWrapperSort(request, queryWrapper, "orderNum", SystemConstant.ORDER_ASC, true);
         return this.baseMapper.selectList(queryWrapper);
     }
 

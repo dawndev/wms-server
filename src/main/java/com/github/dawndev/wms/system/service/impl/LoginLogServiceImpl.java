@@ -3,10 +3,10 @@ package com.github.dawndev.wms.system.service.impl;
 import com.github.dawndev.wms.common.authentication.JWTToken;
 import com.github.dawndev.wms.common.authentication.JWTUtil;
 import com.github.dawndev.wms.common.domain.ActiveUser;
-import com.github.dawndev.wms.common.domain.FebsConstant;
-import com.github.dawndev.wms.common.domain.FebsResponse;
-import com.github.dawndev.wms.common.exception.FebsException;
-import com.github.dawndev.wms.common.properties.FebsProperties;
+import com.github.dawndev.wms.common.domain.SystemConstant;
+import com.github.dawndev.wms.common.domain.SimpleResponse;
+import com.github.dawndev.wms.common.exception.WmsException;
+import com.github.dawndev.wms.common.properties.WmsProperties;
 import com.github.dawndev.wms.common.service.RedisService;
 import com.github.dawndev.wms.common.utils.*;
 import com.github.dawndev.wms.system.dao.LoginLogMapper;
@@ -19,7 +19,6 @@ import com.github.dawndev.wms.system.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,7 +42,7 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
     private LoginLogService loginLogService;
 
     @Autowired
-    private FebsProperties properties;
+    private WmsProperties properties;
 
     @Autowired
     private RedisService redisService;
@@ -66,10 +65,10 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
     }
 
     @Override
-    public FebsResponse faceLogin(User user, HttpServletRequest request) throws Exception {
+    public SimpleResponse faceLogin(User user, HttpServletRequest request) throws Exception {
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            throw new FebsException("账号已被锁定,请联系管理员！");
+            throw new WmsException("账号已被锁定,请联系管理员！");
         }
 
         User userData = this.userManager.getUser(user.getUsername());
@@ -81,7 +80,7 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
         loginLog.setUsername(userData.getUsername());
         this.loginLogService.saveLoginLog(loginLog);
 
-        String token = FebsUtil.encryptToken(JWTUtil.sign(userData.getUsername(), userData.getPassword()));
+        String token = WarehouseUtil.encryptToken(JWTUtil.sign(userData.getUsername(), userData.getPassword()));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getShiro().getJwtTimeOut());
         String expireTimeStr = DateUtil.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
@@ -90,7 +89,7 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
         userData.setId(userId);
 
         Map<String, Object> userInfo = this.generateUserInfo(jwtToken, userData);
-        return new FebsResponse().message("认证成功").data(userInfo);
+        return new SimpleResponse().message("认证成功").data(userInfo);
     }
 
     private String saveTokenToRedis(User user, JWTToken token, HttpServletRequest request) throws Exception {
@@ -105,9 +104,9 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLog> i
         activeUser.setLoginAddress(AddressUtil.getCityInfo(ip));
 
         // zset 存储登录用户，score 为过期时间戳
-        this.redisService.zadd(FebsConstant.ACTIVE_USERS_ZSET_PREFIX, Double.valueOf(token.getExipreAt()), mapper.writeValueAsString(activeUser));
+        this.redisService.zadd(SystemConstant.ACTIVE_USERS_ZSET_PREFIX, Double.valueOf(token.getExipreAt()), mapper.writeValueAsString(activeUser));
         // redis 中存储这个加密 token，key = 前缀 + 加密 token + .ip
-        this.redisService.set(FebsConstant.TOKEN_CACHE_PREFIX + token.getToken() + StringPool.DOT + ip, token.getToken(), properties.getShiro().getJwtTimeOut() * 1000);
+        this.redisService.set(SystemConstant.TOKEN_CACHE_PREFIX + token.getToken() + StringPool.DOT + ip, token.getToken(), properties.getShiro().getJwtTimeOut() * 1000);
 
         return activeUser.getId();
     }

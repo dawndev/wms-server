@@ -1,7 +1,7 @@
 package com.github.dawndev.wms.common.utils;
 
 import com.github.dawndev.wms.common.authentication.JWTUtil;
-import com.github.dawndev.wms.common.domain.FebsConstant;
+import com.github.dawndev.wms.common.domain.SystemConstant;
 import com.github.dawndev.wms.common.function.CacheSelector;
 import com.github.dawndev.wms.common.service.CacheService;
 import com.github.dawndev.wms.system.domain.User;
@@ -15,10 +15,10 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 /**
- * FEBS工具类
+ * 工具类
  */
 @Slf4j
-public class FebsUtil {
+public class WarehouseUtil {
 
     /**
      * 缓存查询模板
@@ -68,7 +68,7 @@ public class FebsUtil {
      */
     public static String encryptToken(String token) {
         try {
-            EncryptUtil encryptUtil = new EncryptUtil(FebsConstant.TOKEN_CACHE_PREFIX);
+            EncryptUtil encryptUtil = new EncryptUtil(SystemConstant.TOKEN_CACHE_PREFIX);
             return encryptUtil.encrypt(token);
         } catch (Exception e) {
             log.info("token加密失败：", e);
@@ -84,7 +84,7 @@ public class FebsUtil {
      */
     public static String decryptToken(String encryptToken) {
         try {
-            EncryptUtil encryptUtil = new EncryptUtil(FebsConstant.TOKEN_CACHE_PREFIX);
+            EncryptUtil encryptUtil = new EncryptUtil(SystemConstant.TOKEN_CACHE_PREFIX);
             return encryptUtil.decrypt(encryptToken);
         } catch (Exception e) {
             log.info("token解密失败：", e);

@@ -3,7 +3,7 @@ package com.github.dawndev.wms.system.controller;
 import com.github.dawndev.wms.common.annotation.Log;
 import com.github.dawndev.wms.common.controller.BaseController;
 import com.github.dawndev.wms.common.domain.QueryRequest;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.system.domain.Role;
 import com.github.dawndev.wms.system.domain.RoleMenu;
 import com.github.dawndev.wms.system.service.RoleMenuServie;
@@ -55,53 +55,53 @@ public class RoleController extends BaseController {
     @Log("新增角色")
     @PostMapping
 //    @RequiresPermissions("role:add")
-    public void addRole(@Valid Role role) throws FebsException {
+    public void addRole(@Valid Role role) throws WmsException {
         try {
             this.roleService.createRole(role);
         } catch (Exception e) {
             message = "新增角色失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @Log("删除角色")
     @DeleteMapping("/{roleIds}")
 //    @RequiresPermissions("role:delete")
-    public void deleteRoles(@NotBlank(message = "{required}") @PathVariable String roleIds) throws FebsException {
+    public void deleteRoles(@NotBlank(message = "{required}") @PathVariable String roleIds) throws WmsException {
         try {
             String[] ids = roleIds.split(StringPool.COMMA);
             this.roleService.deleteRoles(ids);
         } catch (Exception e) {
             message = "删除角色失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @Log("修改角色")
     @PutMapping
 //    @RequiresPermissions("role:update")
-    public void updateRole(Role role) throws FebsException {
+    public void updateRole(Role role) throws WmsException {
         try {
             this.roleService.updateRole(role);
         } catch (Exception e) {
             message = "修改角色失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @PostMapping("excel")
 //    @RequiresPermissions("role:export")
-    public void export(QueryRequest queryRequest, Role role, HttpServletResponse response) throws FebsException {
+    public void export(QueryRequest queryRequest, Role role, HttpServletResponse response) throws WmsException {
         try {
             List<Role> roles = this.roleService.findRoles(role, queryRequest).getRecords();
             ExcelKit.$Export(Role.class, response).downXlsx(roles, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 }

@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author FanK
+ * 公告
  */
 @RestController
 @RequestMapping("/cos/bulletin-info")

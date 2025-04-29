@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "febs")
-public class FebsProperties {
+@ConfigurationProperties(prefix = "wms")
+public class WmsProperties {
 
     private ShiroProperties shiro = new ShiroProperties();
 

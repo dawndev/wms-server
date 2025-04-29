@@ -3,7 +3,7 @@ package com.github.dawndev.wms.system.controller;
 import com.github.dawndev.wms.common.annotation.Log;
 import com.github.dawndev.wms.common.controller.BaseController;
 import com.github.dawndev.wms.common.domain.QueryRequest;
-import com.github.dawndev.wms.common.exception.FebsException;
+import com.github.dawndev.wms.common.exception.WmsException;
 import com.github.dawndev.wms.system.domain.SysLog;
 import com.github.dawndev.wms.system.service.LogService;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -39,27 +39,27 @@ public class LogController extends BaseController {
     @Log("删除系统日志")
     @DeleteMapping("/{ids}")
     @RequiresPermissions("log:delete")
-    public void deleteLogss(@NotBlank(message = "{required}") @PathVariable String ids) throws FebsException {
+    public void deleteLogss(@NotBlank(message = "{required}") @PathVariable String ids) throws WmsException {
         try {
             String[] logIds = ids.split(StringPool.COMMA);
             this.logService.deleteLogs(logIds);
         } catch (Exception e) {
             message = "删除日志失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 
     @PostMapping("excel")
     @RequiresPermissions("log:export")
-    public void export(QueryRequest request, SysLog sysLog, HttpServletResponse response) throws FebsException {
+    public void export(QueryRequest request, SysLog sysLog, HttpServletResponse response) throws WmsException {
         try {
             List<SysLog> sysLogs = this.logService.findLogs(request, sysLog).getRecords();
             ExcelKit.$Export(SysLog.class, response).downXlsx(sysLogs, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.error(message, e);
-            throw new FebsException(message);
+            throw new WmsException(message);
         }
     }
 }
