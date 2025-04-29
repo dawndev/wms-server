@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 /**
  * 补货通知
  *
- * @author FanK
+ * @author Espen
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

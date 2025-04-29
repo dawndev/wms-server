@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author FanK
+ * @author Espen
  */
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))

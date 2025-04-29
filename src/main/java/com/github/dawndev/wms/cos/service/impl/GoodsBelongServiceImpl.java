@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
- * @author FanK
+ * @author Espen
  */
 @Service
 public class GoodsBelongServiceImpl extends ServiceImpl<GoodsBelongMapper, GoodsBelong> implements IGoodsBelongService {

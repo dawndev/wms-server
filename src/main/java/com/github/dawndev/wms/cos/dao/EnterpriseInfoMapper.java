@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.LinkedHashMap;
 
 /**
- * @author FanK
+ * @author Espen
  */
 public interface EnterpriseInfoMapper extends BaseMapper<EnterpriseInfo> {
 

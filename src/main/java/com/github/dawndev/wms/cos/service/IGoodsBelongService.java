@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
- * @author FanK
+ * @author Espen
  */
 public interface IGoodsBelongService extends IService<GoodsBelong> {
 

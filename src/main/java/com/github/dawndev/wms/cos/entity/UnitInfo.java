@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 /**
  * 计量单位
  *
- * @author FanK
+ * @author Espen
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

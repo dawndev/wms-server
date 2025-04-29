@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * @author FanK
+ * @author Espen
  */
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))

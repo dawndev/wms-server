@@ -10,9 +10,6 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      * 根据用户Id删除该用户的角色关系
      *
      * @param userId 用户ID
-     * @return boolean
-     * @author lzx
-     * @date 2019年03月04日17:46:49
      */
     Boolean deleteByUserId(@Param("userId") Long userId);
 
@@ -21,8 +18,6 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      *
      * @param roleId 角色ID
      * @return boolean
-     * @author lzx
-     * @date 2019年03月04日17:47:16
      */
     Boolean deleteByRoleId(@Param("roleId") Long roleId);
 }

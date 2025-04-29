@@ -11,7 +11,7 @@ import java.io.Serializable;
 /**
  * 企业信息管理
  *
- * @author FanK
+ * @author Espen
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

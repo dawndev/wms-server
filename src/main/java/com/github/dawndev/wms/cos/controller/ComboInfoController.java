@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author FanK
+ * @author Espen
  */
 @RestController
 @RequestMapping("/cos/combo-info")

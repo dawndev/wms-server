@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
 /**
  * 实验套餐管理
  *
- * @author FanK
+ * @author Espen
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

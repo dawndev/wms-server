@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
 /**
  * 出库管理
  *
- * @author FanK
+ * @author Espen
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

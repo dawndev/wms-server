@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
- * @author FanK
+ * @author Espen
  */
 public interface IStockInfoService extends IService<StockInfo> {
 
