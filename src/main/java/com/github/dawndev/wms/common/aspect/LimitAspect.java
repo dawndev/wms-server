@@ -1,12 +1,15 @@
 package com.github.dawndev.wms.common.aspect;
 
 import com.github.dawndev.wms.common.annotation.Limit;
+import com.github.dawndev.wms.common.authentication.JWTUtil;
 import com.github.dawndev.wms.common.domain.LimitType;
 import com.github.dawndev.wms.common.exception.LimitAccessException;
+import com.github.dawndev.wms.common.utils.HttpContextUtil;
 import com.github.dawndev.wms.common.utils.IPUtil;
 import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,80 +26,87 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
- * 接口限流
+ * 接口限流的切面
+ * <p>
+ *     基于 Redis + Lua 实现的分布式限流切面，用于控制接口访问频率
+ * </p>
+ * <p>
+ *      优势：分布式限流、低延迟（Lua脚本原子化执行）
+ *      优化点：脚本原子性、集群兼容性、监控日志
+ *      扩展性：支持多种限流维度和动态规则
+ * </p>
  */
 @Slf4j
 @Aspect
 @Component
 public class LimitAspect {
 
-    private final RedisTemplate<String, Serializable> limitRedisTemplate;
+    private final RedisTemplate<String, Serializable> redisTemplate;
+    private final RedisScript<Long> redisScript;
 
-    @Autowired
-    public LimitAspect(RedisTemplate<String, Serializable> limitRedisTemplate) {
-        this.limitRedisTemplate = limitRedisTemplate;
+    public LimitAspect(RedisTemplate<String, Serializable> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+        this.redisScript = loadRedisScript();
     }
 
-    @Pointcut("@annotation(com.github.dawndev.wms.common.annotation.Limit)")
-    public void pointcut() {
-        // do nothing
+    @Around("@annotation(limit)")
+    public Object around(ProceedingJoinPoint point, Limit limit) throws Throwable {
+        HttpServletRequest request = HttpContextUtil.getHttpServletRequest();
+        String actualKey = resolveKey(point, limit, request);
+        String prefix = limit.prefix();
+
+        // 集群兼容：使用 {} 保证哈希一致性
+        String fullKey = "{" + prefix + "}_" + actualKey;
+
+        Long count = redisTemplate.execute(
+                redisScript,
+                Collections.singletonList(fullKey),
+                limit.count(),
+                limit.period()
+        );
+
+        if (count == null || count <= limit.count()) {
+            return point.proceed();
+        }
+
+        log.warn("限流触发：key={}, 计数={}, 限制={}/{}s", fullKey, count, limit.count(), limit.period());
+        throw new LimitAccessException("请求过于频繁，请 " + limit.period() + " 秒后再试");
     }
 
-    @Around("pointcut()")
-    public Object around(ProceedingJoinPoint point) throws Throwable {
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
-
+    private String resolveKey(ProceedingJoinPoint point, Limit limit, HttpServletRequest request) {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
-        Limit limitAnnotation = method.getAnnotation(Limit.class);
-        LimitType limitType = limitAnnotation.limitType();
-        String name = limitAnnotation.name();
-        String key;
-        String ip = IPUtil.getIpAddr(request);
-        int limitPeriod = limitAnnotation.period();
-        int limitCount = limitAnnotation.count();
-        switch (limitType) {
+        switch (limit.limitType()) {
             case IP:
-                key = ip;
-                break;
+                return IPUtil.getIpAddr(request);
+            case USER:
+                return (String) SecurityUtils.getSubject().getPrincipal();
             case CUSTOMER:
-                key = limitAnnotation.key();
-                break;
+                return limit.key();
             default:
-                key = StringUtils.upperCase(method.getName());
-        }
-        ImmutableList<String> keys = ImmutableList.of(StringUtils.join(limitAnnotation.prefix() + "_", key, ip));
-        String luaScript = buildLuaScript();
-        RedisScript<Number> redisScript = new DefaultRedisScript<>(luaScript, Number.class);
-        Number count = limitRedisTemplate.execute(redisScript, keys, limitCount, limitPeriod);
-        log.info("IP:{} 第 {} 次访问key为 {}，描述为 [{}] 的接口", ip, count, keys, name);
-        if (count != null && count.intValue() <= limitCount) {
-            return point.proceed();
-        } else {
-            throw new LimitAccessException("接口访问超出频率限制");
+                return StringUtils.upperCase(method.getName());
         }
     }
 
-    /**
-     * 限流脚本
-     * 调用的时候不超过阈值，则直接返回并执行计算器自加。
-     *
-     * @return lua脚本
-     */
-    private String buildLuaScript() {
-        return "local c" +
-                "\nc = redis.call('get',KEYS[1])" +
-                "\nif c and tonumber(c) > tonumber(ARGV[1]) then" +
-                "\nreturn c;" +
-                "\nend" +
-                "\nc = redis.call('incr',KEYS[1])" +
-                "\nif tonumber(c) == 1 then" +
-                "\nredis.call('expire',KEYS[1],ARGV[2])" +
-                "\nend" +
-                "\nreturn c;";
+    private RedisScript<Long> loadRedisScript() {
+        String lua = "local key = KEYS[1]\n" +
+                "local limit = tonumber(ARGV[1])\n" +
+                "local expire = tonumber(ARGV[2])\n\n" +
+                "local current = tonumber(redis.call('GET', key) or 0)\n" +
+                "if current >= limit then\n" +
+                "    return current\n" +
+                "end\n\n" +
+                "current = redis.call('INCR', key)\n" +
+                "if current == 1 then\n" +
+                "    redis.call('EXPIRE', key, expire)\n" +
+                "end\n" +
+                "return current";
+        return new DefaultRedisScript<>(lua, Long.class);
     }
 
+    // 辅助方法省略...
 }

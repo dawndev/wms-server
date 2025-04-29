@@ -1,8 +1,11 @@
 package com.github.dawndev.wms.common.domain;
 
+/**
+ * 限流维度
+ */
 public enum LimitType {
-    // 传统类型
-    CUSTOMER,
-    // 根据 IP 限制
-    IP;
+    IP,         // 按IP
+    USER,       // 按用户ID
+    METHOD,     // 按方法
+    CUSTOMER    // 自定义
 }
