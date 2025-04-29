@@ -32,9 +32,7 @@ public class LogAspect {
     private LogService logService;
 
     // 将日志开关 wmsProperties.isOpenAopLog() 移到切点中，避免每次请求都检查
-    @Pointcut("@annotation(com.github.dawndev.wms.common.annotation.Log) && " +
-            "within(com.github.dawndev.wms..*) && " +
-            "@annotation(wmsProperties.openAopLog)")
+    @Pointcut("@annotation(com.github.dawndev.wms.common.annotation.Log)")
     public void pointcut() {
         // do nothing
     }
@@ -47,9 +45,10 @@ public class LogAspect {
         result = point.proceed();
         // 获取 request
         HttpServletRequest request = HttpContextUtil.getHttpServletRequest();
-
-        SysLog log = this.buildSysLog(point, request, beginTime);
-        logService.saveAsyncLog(point, log);
+        if (wmsProperties.isOpenAopLog()) {
+            SysLog log = this.buildSysLog(point, request, beginTime);
+            logService.saveAsyncLog(point, log);
+        }
         return result;
     }
 
