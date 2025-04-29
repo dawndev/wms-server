@@ -20,6 +20,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * 基于 Apache Shiro 的 JWT 认证过滤器实现，用于处理基于 Token 的接口权限控制
+ * <p>
+ *    拦截 HTTP 请求，验证 JWT Token 的合法性。
+ * </p>
+ * <p>
+ *     支持配置匿名访问路径（shiro.anonUrl）。
+ * </p>
+ * <p>
+ *     处理跨域请求（OPTIONS 预检请求）。
+ * </p>
+ * <p>
+ *     返回统一的 401 未认证响应。
+ * </p>
+ */
 @Slf4j
 public class JWTFilter extends BasicHttpAuthenticationFilter {
 
@@ -27,6 +42,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 
     private AntPathMatcher pathMatcher = new AntPathMatcher();
 
+    /**
+     * 判断请求是否允许访问
+     */
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws UnauthorizedException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
@@ -45,6 +63,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
         return false;
     }
 
+    /**
+     * 检查请求头是否携带 Token
+     */
     @Override
     protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
         HttpServletRequest req = (HttpServletRequest) request;
@@ -52,6 +73,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
         return token != null;
     }
 
+    /**
+     * 执行 Shiro 的登录逻辑
+     */
     @Override
     protected boolean executeLogin(ServletRequest request, ServletResponse response) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
@@ -84,6 +108,10 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
         return super.preHandle(request, response);
     }
 
+    /**
+     * 返回 401 未认证响应
+     * @return
+     */
     @Override
     protected boolean sendChallenge(ServletRequest request, ServletResponse response) {
         log.debug("Authentication required: sending 401 Authentication challenge response.");
