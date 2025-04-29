@@ -21,7 +21,7 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-            log.info("WMS启动完毕，时间：{}", LocalDateTime.now());
+            log.info("(♥◠‿◠)ﾉﾞ  WMS 启动成功   ლ(´ڡ`ლ)，时间：{}", LocalDateTime.now());
         }
     }
 }

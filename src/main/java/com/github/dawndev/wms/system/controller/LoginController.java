@@ -62,7 +62,7 @@ public class LoginController {
         if (user == null)
             throw new WmsException("用户名不可以为空~");
         if (!StringUtils.equals(user.getPassword(), password))
-            throw new WmsException(errorMessage + password + " | " + (user.getPassword()));
+            throw new WmsException(errorMessage);
         if (User.STATUS_LOCK.equals(user.getStatus()))
             throw new WmsException("账号已被锁定,请联系管理员！");
 
