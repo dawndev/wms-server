@@ -15,7 +15,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -32,7 +31,10 @@ public class LogAspect {
     @Autowired
     private LogService logService;
 
-    @Pointcut("@annotation(com.github.dawndev.wms.common.annotation.Log)")
+    // 将日志开关 wmsProperties.isOpenAopLog() 移到切点中，避免每次请求都检查
+    @Pointcut("@annotation(com.github.dawndev.wms.common.annotation.Log) && " +
+            "within(com.github.dawndev.wms..*) && " +
+            "@annotation(wmsProperties.openAopLog)")
     public void pointcut() {
         // do nothing
     }
@@ -45,24 +47,23 @@ public class LogAspect {
         result = point.proceed();
         // 获取 request
         HttpServletRequest request = HttpContextUtil.getHttpServletRequest();
-        // 设置 IP 地址
-        String ip = IPUtil.getIpAddr(request);
-        // 执行时长(毫秒)
-        long time = System.currentTimeMillis() - beginTime;
-        if (wmsProperties.isOpenAopLog()) {
-            // 保存日志
-            String token = (String) SecurityUtils.getSubject().getPrincipal();
-            String username = "";
-            if (StringUtils.isNotBlank(token)) {
-                username = JWTUtil.getUsername(token);
-            }
 
-            SysLog log = new SysLog();
-            log.setUsername(username);
-            log.setIp(ip);
-            log.setTime(time);
-            logService.saveLog(point, log);
-        }
+        SysLog log = this.buildSysLog(point, request, beginTime);
+        logService.saveAsyncLog(point, log);
         return result;
+    }
+
+    private SysLog buildSysLog(ProceedingJoinPoint point, HttpServletRequest request, long beginTime) {
+        String ip = IPUtil.getIpAddr(request);
+        String token = (String) SecurityUtils.getSubject().getPrincipal();
+        String username = StringUtils.isNotBlank(token) ? JWTUtil.getUsername(token) : "";
+
+        SysLog sysLog = new SysLog();
+        sysLog.setUsername(username);
+        sysLog.setIp(ip);
+        sysLog.setTime(System.currentTimeMillis() - beginTime);
+//        sysLog.setMethod(point.getSignature().getName());
+//        sysLog.setParams(Arrays.toString(point.getArgs()));
+        return sysLog;
     }
 }

@@ -8,7 +8,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.scheduling.annotation.Async;
 
-
+/**
+ * 日志记录Service
+ */
 public interface LogService extends IService<SysLog> {
 
     IPage<SysLog> findLogs(QueryRequest request, SysLog sysLog);
@@ -16,5 +18,5 @@ public interface LogService extends IService<SysLog> {
     void deleteLogs(String[] logIds);
 
     @Async
-    void saveLog(ProceedingJoinPoint point, SysLog log) throws JsonProcessingException;
+    void saveAsyncLog(ProceedingJoinPoint point, SysLog log) throws JsonProcessingException;
 }

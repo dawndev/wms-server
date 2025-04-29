@@ -20,6 +20,10 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,7 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, SysLog> implements Lo
 
     @Autowired
     ObjectMapper objectMapper;
+    private final ExpressionParser parser = new SpelExpressionParser();
 
     @Override
     public IPage<SysLog> findLogs(QueryRequest request, SysLog sysLog) {
@@ -76,14 +81,16 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, SysLog> implements Lo
 
     @Override
     @Transactional
-    public void saveLog(ProceedingJoinPoint joinPoint, SysLog log) throws JsonProcessingException {
+    public void saveAsyncLog(ProceedingJoinPoint joinPoint, SysLog log) throws JsonProcessingException {
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         Log logAnnotation = method.getAnnotation(Log.class);
         if (logAnnotation != null) {
             // 注解上的描述
-            log.setOperation(logAnnotation.value());
+            String operation = parseSpel(logAnnotation.value(), joinPoint);
+            log.setOperation(operation);
+//            log.setType(logAnnotation.type());
         }
         // 请求的类名
         String className = joinPoint.getTarget().getClass().getName();
@@ -136,6 +143,23 @@ public class LogServiceImpl extends ServiceImpl<LogMapper, SysLog> implements Lo
             }
         }
         return params;
+    }
+
+    private String parseSpel(String expr, ProceedingJoinPoint joinPoint) {
+        if (!expr.contains("#")) return expr;
+
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        EvaluationContext context = new StandardEvaluationContext();
+        context.setVariable("args", joinPoint.getArgs());
+
+        // 设置参数名（如 #{#user.id} 中的 user）
+        String[] paramNames = signature.getParameterNames();
+        Object[] args = joinPoint.getArgs();
+        for (int i = 0; i < args.length; i++) {
+            context.setVariable(paramNames[i], args[i]);
+        }
+
+        return parser.parseExpression(expr).getValue(context, String.class);
     }
 }
 

@@ -52,7 +52,7 @@ public class RoleController extends BaseController {
         return list.stream().map(roleMenu -> String.valueOf(roleMenu.getMenuId())).collect(Collectors.toList());
     }
 
-    @Log("新增角色")
+    @Log("新增角色: #{#user.id}")
     @PostMapping
 //    @RequiresPermissions("role:add")
     public void addRole(@Valid Role role) throws WmsException {
