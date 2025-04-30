@@ -134,6 +134,20 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
+    public Long delPattern(String pattern) throws RedisConnectException {
+        String luaScript =
+                "local keys = redis.call('KEYS', ARGV[1])\n" +
+                        "local count = 0\n" +
+                        "for _, key in ipairs(keys) do\n" +
+                        "    redis.call('DEL', key)\n" +
+                        "    count = count + 1\n" +
+                        "end\n" +
+                        "return count";
+
+        return (Long) this.excuteByJedis(j -> j.eval(luaScript, Collections.emptyList(), Collections.singletonList(pattern)));
+    }
+
+    @Override
     public Boolean exists(String key) throws RedisConnectException {
         return this.excuteByJedis(j -> j.exists(key));
     }

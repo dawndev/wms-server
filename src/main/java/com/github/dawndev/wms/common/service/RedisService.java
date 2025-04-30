@@ -74,6 +74,13 @@ public interface RedisService {
     Long del(String... key) throws RedisConnectException;
 
     /**
+     * 根据通配符模式删除键
+     * @param pattern 键模式（如 "user:*"）
+     * @return 删除的键数量
+     * @throws RedisConnectException
+     */
+    Long delPattern(String pattern) throws RedisConnectException;
+    /**
      * exists命令
      *
      * @param key key
