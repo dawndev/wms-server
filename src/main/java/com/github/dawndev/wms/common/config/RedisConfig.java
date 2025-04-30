@@ -30,8 +30,10 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.util.Arrays;
 
+/**
+ * redis的配置
+ */
 @Configuration
-
 public class RedisConfig extends CachingConfigurerSupport {
 
     @Value("${spring.redis.host}")

@@ -24,7 +24,7 @@ public class RedisServiceImpl implements RedisService {
     @Autowired
     JedisPool jedisPool;
 
-    private static String separator = System.getProperty("line.separator");
+    private static final String separator = System.lineSeparator();
 
     /**
      * 处理 jedis请求
@@ -32,9 +32,9 @@ public class RedisServiceImpl implements RedisService {
      * @param j 处理逻辑，通过 lambda行为参数化
      * @return 处理结果
      */
-    private <T> T excuteByJedis(JedisExecutor<Jedis, T> j) throws RedisConnectException {
+    private <T> T executeByJedis(JedisExecutor<Jedis, T> j) throws RedisConnectException {
         try (Jedis jedis = jedisPool.getResource()) {
-            return j.excute(jedis);
+            return j.execute(jedis);
         } catch (Exception e) {
             throw new RedisConnectException(e.getMessage());
         }
@@ -42,7 +42,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public List<RedisInfo> getRedisInfo() throws RedisConnectException {
-        String info = this.excuteByJedis(
+        String info = this.executeByJedis(
                 j -> {
                     Client client = j.getClient();
                     client.info();
@@ -70,7 +70,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Map<String, Object> getKeysSize() throws RedisConnectException {
-        Long dbSize = this.excuteByJedis(
+        Long dbSize = this.executeByJedis(
                 j -> {
                     Client client = j.getClient();
                     client.dbSize();
@@ -85,7 +85,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Map<String, Object> getMemoryInfo() throws RedisConnectException {
-        String info = this.excuteByJedis(
+        String info = this.executeByJedis(
                 j -> {
                     Client client = j.getClient();
                     client.info();
@@ -108,29 +108,29 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Set<String> getKeys(String pattern) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.keys(pattern));
+        return this.executeByJedis(j -> j.keys(pattern));
     }
 
     @Override
     public String get(String key) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.get(key.toLowerCase()));
+        return this.executeByJedis(j -> j.get(key.toLowerCase()));
     }
 
     @Override
     public String set(String key, String value) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.set(key.toLowerCase(), value));
+        return this.executeByJedis(j -> j.set(key.toLowerCase(), value));
     }
 
     @Override
-    public String set(String key, String value, Long milliscends) throws RedisConnectException {
+    public String set(String key, String value, Long milliseconds) throws RedisConnectException {
         String result = this.set(key.toLowerCase(), value);
-        this.pexpire(key, milliscends);
+        this.pexpire(key, milliseconds);
         return result;
     }
 
     @Override
     public Long del(String... key) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.del(key));
+        return this.executeByJedis(j -> j.del(key));
     }
 
     @Override
@@ -144,42 +144,48 @@ public class RedisServiceImpl implements RedisService {
                         "end\n" +
                         "return count";
 
-        return (Long) this.excuteByJedis(j -> j.eval(luaScript, Collections.emptyList(), Collections.singletonList(pattern)));
+        return (Long) this.executeByJedis(j -> j.eval(luaScript, Collections.emptyList(), Collections.singletonList(pattern)));
     }
 
     @Override
     public Boolean exists(String key) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.exists(key));
+        return this.executeByJedis(j -> j.exists(key));
     }
 
     @Override
     public Long pttl(String key) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.pttl(key));
+        return this.executeByJedis(j -> j.pttl(key));
     }
 
     @Override
     public Long pexpire(String key, Long milliseconds) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.pexpire(key, milliseconds));
+        return this.executeByJedis(j -> j.pexpire(key, milliseconds));
     }
 
     @Override
     public Long zadd(String key, Double score, String member) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.zadd(key, score, member));
+        return this.executeByJedis(j -> j.zadd(key, score, member));
     }
 
     @Override
     public Set<String> zrangeByScore(String key, String min, String max) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.zrangeByScore(key, min, max));
+        return this.executeByJedis(j -> j.zrangeByScore(key, min, max));
     }
 
     @Override
     public Long zremrangeByScore(String key, String start, String end) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.zremrangeByScore(key, start, end));
+        String luaScript =
+                "if redis.call('EXISTS', KEYS[1]) == 1 then\n" +
+                        "    return redis.call('ZREMRANGEBYSCORE', KEYS[1], ARGV[1], ARGV[2])\n" +
+                        "else\n" +
+                        "    return 0\n" +  // 防止攻击不存在的 Key
+                        "end";
+        return executeByJedis(j -> (Long) j.eval(luaScript, 1, key, start, end));
     }
 
     @Override
     public Long zrem(String key, String... members) throws RedisConnectException {
-        return this.excuteByJedis(j -> j.zrem(key, members));
+        return this.executeByJedis(j -> j.zrem(key, members));
     }
 
 }
